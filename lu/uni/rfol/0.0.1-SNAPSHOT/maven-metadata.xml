@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata modelVersion="1.1.0">
-  <groupId>uni.lu</groupId>
+  <groupId>lu.uni</groupId>
   <artifactId>rfol</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <versioning>
     <snapshot>
-      <timestamp>20190401.123758</timestamp>
-      <buildNumber>2</buildNumber>
+      <timestamp>20190401.123922</timestamp>
+      <buildNumber>1</buildNumber>
     </snapshot>
-    <lastUpdated>20190401123758</lastUpdated>
+    <lastUpdated>20190401123922</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>0.0.1-20190401.123758-2</value>
-        <updated>20190401123758</updated>
+        <value>0.0.1-20190401.123922-1</value>
+        <updated>20190401123922</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>0.0.1-20190401.123758-2</value>
-        <updated>20190401123758</updated>
+        <value>0.0.1-20190401.123922-1</value>
+        <updated>20190401123922</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
