@@ -16,7 +16,7 @@ To use it add this repository and dependency in your POM.xml
 
 <dependency>
 	<groupId>uni.lu</groupId>
-	<artifactId>rfol</artifactId>
+	<artifactId>RFOL</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
 
