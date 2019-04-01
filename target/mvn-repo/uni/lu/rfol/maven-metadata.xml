@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-  <groupId>lu.uni</groupId>
+  <groupId>uni.lu</groupId>
   <artifactId>rfol</artifactId>
   <versioning>
     <versions>
+      <version>1.0-SNAPSHOT</version>
       <version>0.0.1-SNAPSHOT</version>
     </versions>
-<<<<<<< HEAD
-    <lastUpdated>20190401123922</lastUpdated>
-=======
-    <lastUpdated>20190401125020</lastUpdated>
->>>>>>> e9bd53f931ec457067ace6efa2e6ac6aade7a0b0
+    <lastUpdated>20190401123758</lastUpdated>
   </versioning>
 </metadata>
