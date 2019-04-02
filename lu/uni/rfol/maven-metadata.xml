@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>lu.uni</groupId>
-  <artifactId>RFOL</artifactId>
+  <artifactId>rfol</artifactId>
   <versioning>
     <versions>
       <version>0.0.1-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20190401131924</lastUpdated>
+    <lastUpdated>20190402072807</lastUpdated>
   </versioning>
 </metadata>
