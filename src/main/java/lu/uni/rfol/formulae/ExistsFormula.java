@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class ExistsFormula implements RSFOLFormula {
+public class ExistsFormula implements RSFOLFormula,Quantification {
 
 	private RSFOLFormula f;
 	private Bound b;

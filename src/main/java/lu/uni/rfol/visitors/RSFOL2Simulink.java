@@ -38,7 +38,27 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 
 	private Set<Integer> componentsAlreadyAdded;
 
+	/**
+	 * if set to 1 it uses a delay Simulink/Block to encode the forall/exists operator
+	 * if set to 0 it uses a memory Simulink/Block to encode the forall/exists operator
+	 */
+	private static int MEMORY_DELAY_SELECTOR=0;
 
+	/**
+	 * Allows choosing whether a memory or a delay is used in the encoding of the forall/exists temporal operators
+	 * 
+	 * @param value if set to 1 it uses a delay Simulink/Block to encode the forall/exists operator
+	 * if set to 0 it uses a memory Simulink/Block to encode the forall/exists operator
+	 * 
+	 * @throws IllegalArgumentException if the value is different from 0 and 1
+	 */
+	public static void setMemoryDelaySelector(int value) {
+		if(value!=0 && value!=1) {
+			throw new IllegalArgumentException("The MemoryDelaySelector accept a value that is either 0 or 1");
+		}
+		MEMORY_DELAY_SELECTOR=value;
+	}
+	
 	public RSFOL2Simulink(String modelName, String name) {
 		this.subcomponentname = modelName + "/" + name;
 		this.componentsAlreadyAdded = new HashSet<>();
@@ -58,17 +78,6 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 					+ signal.hashCode() + "')\n");
 			builder.append("add_line('" + subcomponentname + "', '" + signal.getName() + "/1', '" + signal.hashCode()
 					+ "/1')\n");
-
-			/*
-			 * if(!toWorkspaceSignal.contains(signal.getName())) {
-			 * toWorkspaceSignal.add(signal.getName());
-			 * builder.append("add_block('simulink/Sinks/To Workspace','"+subcomponentname+
-			 * "/"+signal.getName()+"signal')\n");
-			 * builder.append("set_param('"+subcomponentname+"/"+signal.getName()+
-			 * "signal','Variablename','signal_"+signal.getName()+"')\n");
-			 * builder.append("add_line('"+subcomponentname+ "', '"+
-			 * signal.hashCode()+"/1','"+signal.getName()+"signal/1')\n"); }
-			 */
 
 			componentsAlreadyAdded.add(signal.hashCode());
 		}
@@ -142,50 +151,7 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 		return b.toString();
 	}
 
-	/*
-	 * @Override public String visit(Signal signal) { StringBuilder b = new
-	 * StringBuilder();
-	 * 
-	 * if (!componentsAlreadyAdded.contains(signal.hashCode())) {
-	 * 
-	 * String v1 = signal.getSignalID().accept(this); String v2 =
-	 * signal.getTimedTerm().accept(this); b.append(v1); b.append(v2);
-	 * 
-	 * b.append("%" + signal.toString() + "\n");
-	 * 
-	 * b.append("add_block('simulink/Continuous/Variable Time Delay', '" +
-	 * subcomponentname + "/" + signal.hashCode() + "');\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signal.hashCode() +
-	 * "', 'ZeroDelay', 'on')\n");
-	 * 
-	 * String diffName = subcomponentname + "/" + signal.hashCode() + "D";
-	 * b.append("add_block('simulink/Math Operations/Add','" + diffName + "')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + diffName +
-	 * "c')\n"); b.append("set_param('" + diffName + "c', 'Value', '1')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Integrator', '" + diffName
-	 * + "i')\n"); b.append("add_line('" + subcomponentname + "', '" +
-	 * signal.hashCode() + "Dc/1', '" + signal.hashCode() + "Di/1')\n");
-	 * 
-	 * b.append("set_param('" + diffName + "', 'Inputs', '+-')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signal.hashCode() +
-	 * "Di/1', '" + signal.hashCode() + "D/1')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signal.getTimedTerm().hashCode() + "/1', '" + signal.hashCode() + "D/2')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signal.hashCode() +
-	 * "D/1','" + signal.hashCode() + "/2')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signal.getSignalID().hashCode() + "/1', '" + signal.hashCode() + "/1')\n");
-	 * componentsAlreadyAdded.add(signal.hashCode()); }
-	 * 
-	 * return b.toString(); }
-	 */
+	
 
 	@Override
 	public String visit(SignalVector signalVector) {
@@ -225,12 +191,6 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 						+ signalVector.hashCode() + "')\n");
 			}
 
-//			b.append("add_block('dspindex/Multiport Selector', '" + subcomponentname + "/"
-//					+ signalVector.hashCode() + "extractor')\n");
-//			b.append("set_param('" + subcomponentname + "/" + signalVector.hashCode()
-//			+ "extractor', 'rowsOrCols','Rows')\n");
-//			b.append("set_param('" + subcomponentname + "/" + signalVector.hashCode()
-//					+ "extractor', 'idxCellArray','{" + signalVector.getIndex() + "}')\n");
 
 			b.append("add_block('dspindex/Selector', '" + subcomponentname + "/" + signalVector.hashCode()
 					+ "extractor')\n");
@@ -307,6 +267,69 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 
 		return b.toString();
 	}
+	
+	@Override
+	public String visit(ExistsFormula existsFormula) {
+		StringBuilder b = new StringBuilder();
+
+		if (!componentsAlreadyAdded.contains(existsFormula.hashCode())) {
+
+			b.append(existsFormula.getBound().accept(this));
+			b.append(existsFormula.getFormula().accept(this));
+
+			b.append("%" + existsFormula.toString() + "\n");
+
+			b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + subcomponentname + "/"
+					+ existsFormula.hashCode() + "Constant')\n");
+			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "Constant', 'Value', '-1')\n");
+
+			b.append("add_block('simulink/Signal Routing/Switch', '" + subcomponentname + "/" + existsFormula.hashCode()
+					+ "Switch')\n");
+			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode()
+					+ "Switch', 'Criteria', 'u2 > Threshold')\n");
+
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Constant/1', '"
+					+ existsFormula.hashCode() + "Switch/3')\n");
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.getBound().hashCode() + "/1', '"
+					+ existsFormula.hashCode() + "Switch/2')\n");
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.getFormula().hashCode() + "/1', '"
+					+ existsFormula.hashCode() + "Switch/1')\n");
+
+			b.append("add_block('simulink/Math Operations/MinMax', '" + subcomponentname + "/"
+					+ existsFormula.hashCode() + "')\n");
+			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "', 'Function', 'max')\n");
+
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Switch/1', '"
+					+ existsFormula.hashCode() + "/1')\n");
+
+			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "', 'Inputs', '2')\n");
+
+			
+			
+			if(MEMORY_DELAY_SELECTOR==1) {
+				b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname + "/" + existsFormula.hashCode()
+					+ "Delay" + "')\n");
+
+				b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "Delay', 'X0', '-1')\n");
+			}
+			if(MEMORY_DELAY_SELECTOR==0) {
+				b.append("add_block('simulink/Discrete/Memory', '" + subcomponentname + "/" + existsFormula.hashCode()
+				+ "Delay" + "')\n");
+				
+				b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "Delay', 'InitialCondition', '-1')\n");
+			}
+			
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "/1', '"
+					+ existsFormula.hashCode() + "Delay/1')\n");
+
+			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Delay/1', '"
+					+ existsFormula.hashCode() + "/2')\n");
+
+
+			componentsAlreadyAdded.add(existsFormula.hashCode());
+		}
+		return b.toString();
+	}
 
 	@Override
 	public String visit(ForallFormula forallFormula) {
@@ -344,24 +367,25 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 
 			b.append("set_param('" + subcomponentname + "/" + forallFormula.hashCode() + "', 'Inputs', '2')\n");
 
-			// b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname +
-			// "/" + forallFormula.hashCode() + "Delay"+ "')\n");
-			b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname + "/" + forallFormula.hashCode()
+			
+			if(MEMORY_DELAY_SELECTOR==1) {
+				b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname + "/" + forallFormula.hashCode()
 					+ "Delay" + "')\n");
 
-			// b.append("set_param('" + subcomponentname + "/"+ forallFormula.hashCode() +
-			// "Delay', 'InitialCondition', '0')\n");
-			b.append("set_param('" + subcomponentname + "/" + forallFormula.hashCode() + "Delay', 'X0', '1')\n");
-			// b.append("set_param('" + subcomponentname+ "/" + forallFormula.hashCode() +
-			// "Delay','DelayLength', '1')\n");
+				b.append("set_param('" + subcomponentname + "/" + forallFormula.hashCode() + "Delay', 'X0', '1')\n");
+			}
+			if(MEMORY_DELAY_SELECTOR==0) {
+				b.append("add_block('simulink/Discrete/Memory', '" + subcomponentname + "/" + forallFormula.hashCode()
+				+ "Delay" + "')\n");
+				
+				b.append("set_param('" + subcomponentname + "/" + forallFormula.hashCode() + "Delay', 'InitialCondition', '1')\n");
+			}
 
 			b.append("add_line('" + subcomponentname + "', '" + forallFormula.hashCode() + "/1', '"
 					+ forallFormula.hashCode() + "Delay/1')\n");
 
 			b.append("add_line('" + subcomponentname + "', '" + forallFormula.hashCode() + "Delay/1', '"
 					+ forallFormula.hashCode() + "/2')\n");
-
-//			b.append("add_block('simulink/Discrete/MinMax', '" + subcomponentname + forallFormula.hashCode()			+ "')\n");
 
 			componentsAlreadyAdded.add(forallFormula.hashCode());
 		}
@@ -372,32 +396,6 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 	public String visit(NotFormula notFormula) {
 		throw new InternalError("Not supported formula");
 	}
-	/*@Override
-	public String visit(NotFormula notFormula) {
-		StringBuilder b = new StringBuilder();
-
-		if (!componentsAlreadyAdded.contains(notFormula.hashCode())) {
-			b.append(notFormula.getSubformula().accept(this));
-
-			b.append("%" + notFormula.toString() + "\n");
-
-			String constantName = subcomponentname + "/" + notFormula.hashCode();
-			b.append("add_block('simulink/Math Operations/Gain', '" + constantName + "')\n");
-			b.append("set_param('" + constantName + "', 'Gain', '-1')\n");
-
-			// String diffName = subcomponentname + "/"+ notFormula.hashCode();
-			// b.append("add_block('simulink/Math Operations/Add','" + diffName + "')\n");
-
-			// b.append("add_line('" + subcomponentname + "', '" + notFormula.hashCode() +
-			// "c/1', '"+ notFormula.hashCode() + "/1')\n");
-			b.append("add_line('" + subcomponentname + "', '" + notFormula.getSubformula().hashCode() + "/1', '"
-					+ notFormula.hashCode() + "/1')\n");
-
-//			b.append("set_param('" + diffName + "', 'Inputs', '+-')\n");
-			componentsAlreadyAdded.add(notFormula.hashCode());
-		}
-		return b.toString();
-	}*/
 
 	@Override
 	public String visit(BinaryFormula binaryFormula) {
@@ -1122,63 +1120,5 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 		return b.toString();
 	}
 
-	@Override
-	public String visit(ExistsFormula existsFormula) {
-		StringBuilder b = new StringBuilder();
-
-		if (!componentsAlreadyAdded.contains(existsFormula.hashCode())) {
-
-			b.append(existsFormula.getBound().accept(this));
-			b.append(existsFormula.getFormula().accept(this));
-
-			b.append("%" + existsFormula.toString() + "\n");
-
-			b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + subcomponentname + "/"
-					+ existsFormula.hashCode() + "Constant')\n");
-			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "Constant', 'Value', '-1')\n");
-
-			b.append("add_block('simulink/Signal Routing/Switch', '" + subcomponentname + "/" + existsFormula.hashCode()
-					+ "Switch')\n");
-			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode()
-					+ "Switch', 'Criteria', 'u2 > Threshold')\n");
-
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Constant/1', '"
-					+ existsFormula.hashCode() + "Switch/3')\n");
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.getBound().hashCode() + "/1', '"
-					+ existsFormula.hashCode() + "Switch/2')\n");
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.getFormula().hashCode() + "/1', '"
-					+ existsFormula.hashCode() + "Switch/1')\n");
-
-			b.append("add_block('simulink/Math Operations/MinMax', '" + subcomponentname + "/"
-					+ existsFormula.hashCode() + "')\n");
-			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "', 'Function', 'max')\n");
-
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Switch/1', '"
-					+ existsFormula.hashCode() + "/1')\n");
-
-			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "', 'Inputs', '2')\n");
-
-			// b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname +
-			// "/" + existsFormula.hashCode() + "Delay"+ "')\n");
-			b.append("add_block('simulink/Discrete/Unit Delay', '" + subcomponentname + "/" + existsFormula.hashCode()
-					+ "Delay" + "')\n");
-
-			// b.append("set_param('" + subcomponentname + "/"+ existsFormula.hashCode() +
-			// "Delay', 'InitialCondition', '0')\n");
-			b.append("set_param('" + subcomponentname + "/" + existsFormula.hashCode() + "Delay', 'X0', '-1')\n");
-			// b.append("set_param('" + subcomponentname+ "/" + existsFormula.hashCode() +
-			// "Delay','DelayLength', '1')\n");
-
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "/1', '"
-					+ existsFormula.hashCode() + "Delay/1')\n");
-
-			b.append("add_line('" + subcomponentname + "', '" + existsFormula.hashCode() + "Delay/1', '"
-					+ existsFormula.hashCode() + "/2')\n");
-
-//			b.append("add_block('simulink/Discrete/MinMax', '" + subcomponentname + forallFormula.hashCode()			+ "')\n");
-
-			componentsAlreadyAdded.add(existsFormula.hashCode());
-		}
-		return b.toString();
-	}
+	
 }

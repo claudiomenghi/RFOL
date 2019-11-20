@@ -1,5 +1,7 @@
 package lu.uni.rfol.atoms;
 
+import java.util.Comparator;
+
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
 import lu.uni.rfol.visitors.RSFOLVisitor;
@@ -7,7 +9,12 @@ import lu.uni.rfol.visitors.RSFOLVisitor;
 public class Value implements Expression {
 
 	
-
+	public static Comparator<Value> valueComparator=	new Comparator<Value>() {
+        @Override
+        public int compare(Value h1, Value h2) {
+            return h1.getVal()> h2.getVal() ? 1: h1.getVal() == h2.getVal()? 0 :-1;
+        }
+ };
 	@Override
 	public int hashCode() {
 		final int prime = 31;

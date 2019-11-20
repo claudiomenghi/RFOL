@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class ForallFormula implements RSFOLFormula {
+public class ForallFormula implements RSFOLFormula,Quantification {
 
 	private RSFOLFormula f;
 	private Bound b;
