@@ -59,6 +59,7 @@ public class TimeShifting {
 		RFOL2GetQuantificatorConstants visitor = new RFOL2GetQuantificatorConstants();
 		f.accept(visitor);
 		Map<Quantification, Set<Value>> quantificationConstantMap = visitor.map;
+		System.out.println(quantificationConstantMap);
 
 		for (Entry<Quantification, Set<Value>> entry : quantificationConstantMap.entrySet()) {
 

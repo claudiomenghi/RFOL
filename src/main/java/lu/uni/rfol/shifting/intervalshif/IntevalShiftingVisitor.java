@@ -73,12 +73,14 @@ public class IntevalShiftingVisitor implements RSFOLVisitor<RSFOLFormula> {
 		binaryFormula.getSubformula2().accept(this);
 		forall.put(binaryFormula.getUI(),
 				Value.valueComparator.compare(forall.get(binaryFormula.getSubformula1().getUI()),
-						forall.get(binaryFormula.getSubformula1().getUI())) > 0 ? forall.get(binaryFormula.getSubformula1().getUI())
+						forall.get(binaryFormula.getSubformula1().getUI())) > 0
+								? forall.get(binaryFormula.getSubformula1().getUI())
 								: forall.get(binaryFormula.getSubformula2().getUI()));
 
 		exists.put(binaryFormula.getUI(),
 				Value.valueComparator.compare(exists.get(binaryFormula.getSubformula1().getUI()),
-						exists.get(binaryFormula.getSubformula1().getUI())) < 0 ? exists.get(binaryFormula.getSubformula1().getUI())
+						exists.get(binaryFormula.getSubformula1().getUI())) < 0
+								? exists.get(binaryFormula.getSubformula1().getUI())
 								: exists.get(binaryFormula.getSubformula2().getUI()));
 
 		return binaryFormula;
@@ -104,16 +106,16 @@ public class IntevalShiftingVisitor implements RSFOLVisitor<RSFOLFormula> {
 				forallFormula.getBound().getLeftbound().shift(c2);
 				forallFormula.getBound().getRightbound().shift(c2);
 			}
-			
-			for (TimedTermExpression texp : this.maptvariableExpressions.get(forallFormula.getBound().getTvariable())) {
-				texp.shift((-c1 - c2));
+
+			if (this.maptvariableExpressions.containsKey(forallFormula.getBound().getTvariable())) {
+				for (TimedTermExpression texp : this.maptvariableExpressions
+						.get(forallFormula.getBound().getTvariable())) {
+					texp.shift((-c1 - c2));
+				}
 			}
-			
-			Value existsforallvalue=forall.get(forallFormula.getFormula().getUI());
-			Value maxval = Value.valueComparator.compare(
-					tau2, 
-					existsforallvalue) > 0 ? tau2
-					: existsforallvalue;
+
+			Value existsforallvalue = forall.get(forallFormula.getFormula().getUI());
+			Value maxval = Value.valueComparator.compare(tau2, existsforallvalue) > 0 ? tau2 : existsforallvalue;
 			forall.put(forallFormula.getUI(), maxval);
 			exists.put(forallFormula.getUI(), exists.get(forallFormula.getFormula().getUI()));
 		}
@@ -170,7 +172,6 @@ public class IntevalShiftingVisitor implements RSFOLVisitor<RSFOLFormula> {
 		return bound;
 	}
 
-	
 	@Override
 	public RSFOLFormula visit(InfiniteTerm infiniteTerm) {
 		computeF(infiniteTerm);
@@ -288,7 +289,8 @@ public class IntevalShiftingVisitor implements RSFOLVisitor<RSFOLFormula> {
 			for (TimedTermExpression texp : this.maptvariableExpressions.get(existsFormula.getBound().getTvariable())) {
 				texp.shift((-c1 - c2));
 			}
-			Value maxval = Value.valueComparator.compare(tau2, exists.get(existsFormula.getFormula().getUI())) > 0 ? tau2
+			Value maxval = Value.valueComparator.compare(tau2, exists.get(existsFormula.getFormula().getUI())) > 0
+					? tau2
 					: exists.get(existsFormula.getFormula().getUI());
 			forall.put(existsFormula.getUI(), forall.get(existsFormula.getFormula().getUI()));
 			exists.put(existsFormula.getUI(), maxval);

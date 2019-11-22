@@ -132,8 +132,7 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 				b.append("set_param('" + name+ "c', 'Value', '1')\n");
 				
 				b.append("add_block('simulink/Commonly Used Blocks/Integrator', '" + name + "integrator')\n");
-				b.append("add_line('" + name + "c/1', '"
-						+ name+ "integrator/1')\n");
+				b.append("add_line('" + subcomponentname + "','"+signal.hashCode()+"c/1', '"+signal.hashCode()+"integrator/1')\n");
 				
 
 				b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + name + "timevalue')\n");
@@ -142,42 +141,41 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 				b.append("add_block('simulink/Logic and Bit Operations/Relational Operator', '" + name + "timecheck')\n");
 				b.append("set_param('"+ name + "timecheck', 'Operator', '==')\n");
 				
-				b.append("add_line('" + name + "integrator/1', '"
-						+ name+ "timecheck/1')\n");
-				b.append("add_line('" + name + "timevalue/1', '"
-						+ name+ "timecheck/2')\n");
+				b.append("add_line('" + subcomponentname + "','"+signal.hashCode()+"integrator/1', '"+signal.hashCode()+"timecheck/1')\n");
+				b.append("add_line('" + subcomponentname + "','"+signal.hashCode()+"timevalue/1', '"+signal.hashCode()+"timecheck/2')\n");
 				
 				
 				
 				b.append("add_block('simulink/Signal Routing/Switch', '" + name + "Switch')\n");
 				b.append("set_param('" + name + "Switch', 'Criteria', 'u2 ~= 0')\n");
 				
-				b.append("add_line('" + name + "timecheck/1', '"
-						+ name+ "Switch/2')\n");
+				b.append("add_line('" + subcomponentname +"','"+signal.hashCode()+"timecheck/1', '"+signal.hashCode()+"Switch/2')\n");
 				
-				b.append("add_line('" + subcomponentname + "', '" + signal.getSignalID().hashCode() + "/1', '"
-						+ name+ "Switch/1')\n");
+				b.append("add_line('" + subcomponentname+"','" + signal.getSignalID().hashCode() + "/1', '"+signal.hashCode()
+						+ "Switch/1')\n");
 				
 				b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + name + "Dummy')\n");
 				b.append("set_param('" + name+ "Dummy', 'Value', '2.225073858507201e-308')\n");
-				b.append("add_line('" + name + "Dummy/1', '"
-						+ name+ "Switch/3')\n");				
+				b.append("add_line('" + subcomponentname +"','"+signal.hashCode()+  "Dummy/1','"+signal.hashCode()
+						+ "Switch/3')\n");				
 				
 				
 				b.append("add_block('simulink/Math Operations/MinMax', '" + name + "max')\n");
+				
 				b.append("set_param('" + name + "max', 'Function', 'max')\n");
-
-				b.append("add_line('" + name + "Switch/1', '"
-						+ name + "max/1')\n");				
+				b.append("set_param('" + name + "max', 'Inputs', '2')\n");
+				
+				b.append("add_line('" + subcomponentname + "','"+signal.hashCode()+ "Switch/1','"+signal.hashCode()
+						+ "max/1')\n");				
 				
 				
 				b.append("add_block('simulink/Discrete/Memory', '" + name +  "')\n");
 				
-				b.append("add_line('" + name + "max/1', '"
-						+ name+ "/1')\n");				
+				b.append("add_line('" + subcomponentname + "','"+signal.hashCode()+ "max/1', '"+signal.hashCode()
+						+  "/1')\n");				
 				
-				b.append("add_line('" + name + "/1', '"
-						+ name+ "max/2')\n");		
+				b.append("add_line('" + subcomponentname +"','"+signal.hashCode()+  "/1','"+signal.hashCode()
+						+ "max/2')\n");		
 
 				
 			}
