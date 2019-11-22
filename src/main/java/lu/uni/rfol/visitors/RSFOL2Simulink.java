@@ -121,32 +121,95 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 			b.append("%" + signal.toString() + "\n");
 
 			float delayValue = 0;
-			if (signal.getTimedTerm() instanceof TimedTermVariable) {
-				delayValue = -((TimedTermVariable) signal.getTimedTerm()).getValue().getVal();
-				if (((TimedTermVariable) signal.getTimedTerm()).getOperator().equals(ArithmeticOperator.MINUS)) {
-					delayValue = -delayValue;
+			if (signal.getTimedTerm() instanceof TimedTermNumber) {
+				System.out.println("Ci passo");
+				TimedTermNumber t=(TimedTermNumber) signal.getTimedTerm();
+				b.append("%" + signal.toString() + "\n");
+
+				String name = subcomponentname + "/" + signal.hashCode();
+
+				b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + name + "c')\n");
+				b.append("set_param('" + name+ "c', 'Value', '1')\n");
+				
+				b.append("add_block('simulink/Commonly Used Blocks/Integrator', '" + name + "integrator')\n");
+				b.append("add_line('" + name + "c/1', '"
+						+ name+ "integrator/1')\n");
+				
+
+				b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + name + "timevalue')\n");
+				b.append("set_param('" + name+ "timevalue', 'Value', '"+t.getNumber()+"')\n");
+
+				b.append("add_block('simulink/Logic and Bit Operations/Relational Operator', '" + name + "timecheck')\n");
+				b.append("set_param('"+ name + "timecheck', 'Operator', '==')\n");
+				
+				b.append("add_line('" + name + "integrator/1', '"
+						+ name+ "timecheck/1')\n");
+				b.append("add_line('" + name + "timevalue/1', '"
+						+ name+ "timecheck/2')\n");
+				
+				
+				
+				b.append("add_block('simulink/Signal Routing/Switch', '" + name + "Switch')\n");
+				b.append("set_param('" + name + "Switch', 'Criteria', 'u2 ~= 0')\n");
+				
+				b.append("add_line('" + name + "timecheck/1', '"
+						+ name+ "Switch/2')\n");
+				
+				b.append("add_line('" + subcomponentname + "', '" + signal.getSignalID().hashCode() + "/1', '"
+						+ name+ "Switch/1')\n");
+				
+				b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + name + "Dummy')\n");
+				b.append("set_param('" + name+ "Dummy', 'Value', '2.225073858507201e-308')\n");
+				b.append("add_line('" + name + "Dummy/1', '"
+						+ name+ "Switch/3')\n");				
+				
+				
+				b.append("add_block('simulink/Math Operations/MinMax', '" + name + "max')\n");
+				b.append("set_param('" + name + "max', 'Function', 'max')\n");
+
+				b.append("add_line('" + name + "Switch/1', '"
+						+ name + "max/1')\n");				
+				
+				
+				b.append("add_block('simulink/Discrete/Memory', '" + name +  "')\n");
+				
+				b.append("add_line('" + name + "max/1', '"
+						+ name+ "/1')\n");				
+				
+				b.append("add_line('" + name + "/1', '"
+						+ name+ "max/2')\n");		
+
+				
+			}
+			else {
+				if (signal.getTimedTerm() instanceof TimedTermVariable) {
+					delayValue = -((TimedTermVariable) signal.getTimedTerm()).getValue().getVal();
+					if (((TimedTermVariable) signal.getTimedTerm()).getOperator().equals(ArithmeticOperator.MINUS)) {
+						delayValue = -delayValue;
+					}
 				}
-			}
-			if (signal.getTimedTerm() instanceof TimedTermExpression) {
+				if (signal.getTimedTerm() instanceof TimedTermExpression) {
 
-				delayValue = -((TimedTermExpression) signal.getTimedTerm()).getValue().getVal();
-				if (((TimedTermExpression) signal.getTimedTerm()).getOperator().equals(ArithmeticOperator.MINUS)) {
-					delayValue = -delayValue;
+					delayValue = -((TimedTermExpression) signal.getTimedTerm()).getValue().getVal();
+					if (((TimedTermExpression) signal.getTimedTerm()).getOperator().equals(ArithmeticOperator.MINUS)) {
+						delayValue = -delayValue;
+					}
 				}
+
+				if (delayValue != 0) {
+					b.append("add_block('simulink/Continuous/Transport Delay', '" + subcomponentname + "/"
+							+ signal.hashCode() + "');\n");
+					b.append("set_param('" + subcomponentname + "/" + signal.hashCode() + "', 'DelayTime', '"
+							+ delayValue + "')\n");
+				} else {
+					b.append("add_block('simulink/Math Operations/Gain', '" + subcomponentname + "/" + signal.hashCode()
+							+ "')\n");
+				}
+
+				b.append("add_line('" + subcomponentname + "', '" + signal.getSignalID().hashCode() + "/1', '"
+						+ signal.hashCode() + "/1')\n");
 			}
 
-			if (delayValue != 0) {
-				b.append("add_block('simulink/Continuous/Transport Delay', '" + subcomponentname + "/"
-						+ signal.hashCode() + "');\n");
-				b.append("set_param('" + subcomponentname + "/" + signal.hashCode() + "', 'DelayTime', '" + delayValue
-						+ "')\n");
-			} else {
-				b.append("add_block('simulink/Math Operations/Gain', '" + subcomponentname + "/" + signal.hashCode()
-						+ "')\n");
-			}
-
-			b.append("add_line('" + subcomponentname + "', '" + signal.getSignalID().hashCode() + "/1', '"
-					+ signal.hashCode() + "/1')\n");
 			componentsAlreadyAdded.add(signal.hashCode());
 		}
 
@@ -806,132 +869,7 @@ public class RSFOL2Simulink implements RSFOLVisitor<String> {
 		return b.toString();
 	}
 
-	/*
-	 * @Override public String visit(SignalVector signalVector) {
-	 * 
-	 * StringBuilder b = new StringBuilder();
-	 * 
-	 * if (!componentsAlreadyAdded.contains(signalVector.hashCode())) {
-	 * 
-	 * String v1 = signalVector.getSignalID().accept(this); String v2 =
-	 * signalVector.getTimedTerm().accept(this); b.append(v1); b.append(v2);
-	 * 
-	 * b.append("%" + signalVector.toString() + "\n");
-	 * 
-	 * b.append("add_block('simulink/Continuous/Variable Time Delay', '" +
-	 * subcomponentname + "/" + signalVector.hashCode() + "');\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signalVector.hashCode() +
-	 * "', 'ZeroDelay', 'on')\n");
-	 * 
-	 * String diffName = subcomponentname + "/" + signalVector.hashCode() + "D";
-	 * b.append("add_block('simulink/Math Operations/Add','" + diffName + "')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + diffName +
-	 * "c')\n"); b.append("set_param('" + diffName + "c', 'Value', '1')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Integrator', '" + diffName
-	 * + "i')\n"); b.append("add_line('" + subcomponentname + "', '" +
-	 * signalVector.hashCode() + "Dc/1', '" + signalVector.hashCode() + "Di/1')\n");
-	 * 
-	 * b.append("set_param('" + diffName + "', 'Inputs', '+-')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalVector.hashCode() +
-	 * "Di/1', '" + signalVector.hashCode() + "D/1')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signalVector.getTimedTerm().hashCode() + "/1', '" + signalVector.hashCode() +
-	 * "D/2')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalVector.hashCode() +
-	 * "D/1','" + signalVector.hashCode() + "/2')\n");
-	 * 
-	 * b.append("add_block('simulink/Signal Routing/Selector', '" + subcomponentname
-	 * + "/" + signalVector.hashCode() + "extractor')\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signalVector.hashCode() +
-	 * "extractor', 'IndexOptions', 'Index vector (dialog)')\n");
-	 * b.append("set_param('" + subcomponentname + "/" + signalVector.hashCode() +
-	 * "extractor', 'IndexParamArray',{'" + signalVector.getIndex() + "'})\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signalVector.getSignalID().hashCode() + "/1','" + signalVector.hashCode() +
-	 * "extractor/1')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalVector.hashCode() +
-	 * "extractor/1','" + signalVector.hashCode() + "/1')\n");
-	 * componentsAlreadyAdded.add(signalVector.hashCode()); }
-	 * 
-	 * return b.toString();
-	 * 
-	 * }
-	 * 
-	 * @Override public String visit(SignalMatrix signalMatrix) { StringBuilder b =
-	 * new StringBuilder();
-	 * 
-	 * if (!componentsAlreadyAdded.contains(signalMatrix.hashCode())) {
-	 * 
-	 * String v1 = signalMatrix.getSignalID().accept(this); String v2 =
-	 * signalMatrix.getTimedTerm().accept(this); b.append(v1); b.append(v2);
-	 * 
-	 * b.append("%" + signalMatrix.toString() + "\n");
-	 * 
-	 * b.append("add_block('simulink/Continuous/Variable Time Delay', '" +
-	 * subcomponentname + "/" + signalMatrix.hashCode() + "');\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signalMatrix.hashCode() +
-	 * "', 'ZeroDelay', 'on')\n");
-	 * 
-	 * String diffName = subcomponentname + "/" + signalMatrix.hashCode() + "D";
-	 * b.append("add_block('simulink/Math Operations/Add','" + diffName + "')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Constant', '" + diffName +
-	 * "c')\n"); b.append("set_param('" + diffName + "c', 'Value', '1')\n");
-	 * 
-	 * b.append("add_block('simulink/Commonly Used Blocks/Integrator', '" + diffName
-	 * + "i')\n"); b.append("add_line('" + subcomponentname + "', '" +
-	 * signalMatrix.hashCode() + "Dc/1', '" + signalMatrix.hashCode() + "Di/1')\n");
-	 * 
-	 * b.append("set_param('" + diffName + "', 'Inputs', '+-')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalMatrix.hashCode() +
-	 * "Di/1', '" + signalMatrix.hashCode() + "D/1')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signalMatrix.getTimedTerm().hashCode() + "/1', '" + signalMatrix.hashCode() +
-	 * "D/2')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalMatrix.hashCode() +
-	 * "D/1','" + signalMatrix.hashCode() + "/2')\n");
-	 * 
-	 * b.append("add_block('dspindex/Multiport Selector', '" + subcomponentname +
-	 * "/" + signalMatrix.hashCode() + "extractor')\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signalMatrix.hashCode() +
-	 * "extractor', 'rowsOrCols','Rows')\n"); b.append("set_param('" +
-	 * subcomponentname + "/" + signalMatrix.hashCode() +
-	 * "extractor', 'idxCellArray','{" + signalMatrix.getIndex1() + "}')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" +
-	 * signalMatrix.getSignalID().hashCode() + "/1','" + signalMatrix.hashCode() +
-	 * "extractor/1')\n");
-	 * 
-	 * b.append("add_block('dspindex/Multiport Selector', '" + subcomponentname +
-	 * "/" + signalMatrix.hashCode() + "extractor2')\n");
-	 * 
-	 * b.append("set_param('" + subcomponentname + "/" + signalMatrix.hashCode() +
-	 * "extractor2', 'rowsOrCols','Columns')\n"); b.append("set_param('" +
-	 * subcomponentname + "/" + signalMatrix.hashCode() +
-	 * "extractor2', 'idxCellArray','{" + signalMatrix.getIndex2() + "}')\n");
-	 * 
-	 * b.append("add_line('" + subcomponentname + "', '" + signalMatrix.hashCode() +
-	 * "extractor/1','" + signalMatrix.hashCode() + "extractor2/1')\n");
-	 * b.append("add_line('" + subcomponentname + "', '" + signalMatrix.hashCode() +
-	 * "extractor2/1','" + signalMatrix.hashCode() + "/1')\n");
-	 * componentsAlreadyAdded.add(signalMatrix.hashCode()); }
-	 * 
-	 * return b.toString(); }
-	 */
+	
 
 	private void getString(int currehashcode, int hascodeChild1, int hashcoldChild2, StringBuilder b, RELOP op) {
 

@@ -150,6 +150,21 @@ public class TestTimeShift {
 	}
 
 	@Test
+	public void testDoesNotShiftValueWhenSubstracted3() {
+		RSFOLFormula f = new ForallFormula(
+				new Bound(new Tvariable("t"), new TimedTermNumber(0), new TimedTermNumber(10), true, true),
+				new SignalConstantComparison(
+						new Signal(new SignalID("s"), new TimedTermNumber(5) 
+						), RELOP.GEQ, new Value(2)));
+
+		RSFOLFormula f1 = new TimeShifting().perform(f);
+
+		System.out.println(f1);
+		assertEquals(f1.toString(), "(for all t:(5.0,15.0).(s(5.0)>=2.0))");
+		
+	}
+	
+	@Test
 	public void testShiftsTheValueWhenAddedToDifferentTerms() {
 		RSFOLFormula f = new BinaryFormula(
 
