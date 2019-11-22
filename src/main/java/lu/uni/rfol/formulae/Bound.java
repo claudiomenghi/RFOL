@@ -1,6 +1,5 @@
 package lu.uni.rfol.formulae;
 
-
 import lu.uni.rfol.Tvariable;
 import lu.uni.rfol.timedterm.TimedTerm;
 import lu.uni.rfol.visitors.RSFOLVisitor;
@@ -13,12 +12,21 @@ public class Bound implements RSFOLFormula {
 
 	private final boolean lopen;
 	private final boolean ropen;
+
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public Bound(Tvariable tvariable, TimedTerm leftbound, TimedTerm rightbound, boolean lopen, boolean ropen) {
+		UI=UIGenerator.generateUI();
 		this.setTvariable(tvariable);
 		this.setLeftbound(leftbound);
 		this.setRightbound(rightbound);
-		this.lopen=lopen;
-		this.ropen=ropen;
+		this.lopen = lopen;
+		this.ropen = ropen;
 	}
 
 	public TimedTerm getLeftbound() {
@@ -89,7 +97,7 @@ public class Bound implements RSFOLFormula {
 
 	@Override
 	public String toString() {
-		return "for all "+tvariable + ":" + (lopen ? "(" : "[") + leftbound + "," + rightbound + (ropen ? ")" : "]");
+		return  tvariable + ":" + (lopen ? "(" : "[") + leftbound + "," + rightbound + (ropen ? ")" : "]");
 	}
 
 	public boolean isLopen() {

@@ -1,13 +1,22 @@
 package lu.uni.rfol;
 
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class Tvariable implements RSFOLFormula {
 
 	private final String name;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public Tvariable(String name) {
+		UI=UIGenerator.generateUI();
 		this.name = name;
 	}
 

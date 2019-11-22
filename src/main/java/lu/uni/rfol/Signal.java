@@ -2,6 +2,7 @@ package lu.uni.rfol;
 
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.timedterm.TimedTerm;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
@@ -11,7 +12,16 @@ public class Signal  implements Expression, RSFOLFormula{
 	private SignalID signalID;
 	private TimedTerm timedTerm;
 
+	private final int UI;
+	
+	@Override
+	public int getUI() {
+		return UI;
+	}
+	
+	
 	public Signal(SignalID signalID, TimedTerm timedTerm) {
+		UI=UIGenerator.generateUI();
 		this.setSignalID(signalID);
 		this.setTimedTerm(timedTerm);
 	}
@@ -86,6 +96,8 @@ public class Signal  implements Expression, RSFOLFormula{
 	public boolean refersToConstantInstant() {
 		return this.timedTerm.refersToConstantInstant();
 	}
+
+	
 	
 
 }

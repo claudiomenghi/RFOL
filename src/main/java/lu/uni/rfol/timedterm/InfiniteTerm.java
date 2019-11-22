@@ -3,26 +3,36 @@ package lu.uni.rfol.timedterm;
 import lu.uni.rfol.expression.ArithmeticOperator;
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class InfiniteTerm implements TimedTerm {
 
-	private final String infiniteTerm="inf";
-	
-	private int value=-1;
-	
-	private float shiftedValue=0;
-	
+	private final String infiniteTerm = "inf";
+
+	private int value = -1;
+
+	private float shiftedValue = 0;
+
+	private final int UI;
+
+	public InfiniteTerm() {
+		
+		UI=UIGenerator.generateUI();
+	}
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public float getShiftedValue() {
 		return shiftedValue;
 	}
 
 	@Override
 	public String toString() {
-		return infiniteTerm+ ((shiftedValue!=0) ? "+"+shiftedValue : "");
+		return infiniteTerm + ((shiftedValue != 0) ? "+" + shiftedValue : "");
 	}
-
-	
 
 	@Override
 	public int hashCode() {
@@ -60,11 +70,10 @@ public class InfiniteTerm implements TimedTerm {
 		return v.visit(this);
 	}
 
-	
 	@Override
 	public void compose(Expression value, ArithmeticOperator op) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -74,8 +83,8 @@ public class InfiniteTerm implements TimedTerm {
 
 	@Override
 	public void shift(float value) {
-		shiftedValue=shiftedValue+value;
-		
+		shiftedValue = shiftedValue + value;
+
 	}
 
 	@Override

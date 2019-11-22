@@ -1,13 +1,22 @@
 package lu.uni.rfol;
 
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class SignalID implements RSFOLFormula {
 
 	private final String name;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public SignalID(String name) {
+		UI=UIGenerator.generateUI();
 		this.name = name;
 	}
 

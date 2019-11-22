@@ -3,15 +3,24 @@ package lu.uni.rfol.timedterm;
 import lu.uni.rfol.expression.ArithmeticOperator;
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class TimedTermNumber implements TimedTerm {
 
-	  final double THRESHOLD = .0001;
-	  
+	final double THRESHOLD = .0001;
+
 	private float number;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public TimedTermNumber(float number) {
+		UI=UIGenerator.generateUI();
 		this.number = number;
 	}
 
@@ -28,7 +37,6 @@ public class TimedTermNumber implements TimedTerm {
 	public float getNumber() {
 		return number;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -48,17 +56,15 @@ public class TimedTermNumber implements TimedTerm {
 			return false;
 		TimedTermNumber other = (TimedTermNumber) obj;
 		if (Math.abs(number - other.number) > THRESHOLD)
-				
+
 			return false;
 		return true;
 	}
 
-
-
 	@Override
 	public void compose(Expression value, ArithmeticOperator op) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -68,8 +74,8 @@ public class TimedTermNumber implements TimedTerm {
 
 	@Override
 	public void shift(float value) {
-		this.number=this.number+value;
-		
+		this.number = this.number + value;
+
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import lu.uni.rfol.atoms.SignalComparison;
 import lu.uni.rfol.atoms.SignalConstantComparison;
 import lu.uni.rfol.atoms.Value;
 import lu.uni.rfol.expression.ArithmeticOperator;
+import lu.uni.rfol.expression.BinaryExpression;
 import lu.uni.rfol.formulae.BinaryFormula;
 import lu.uni.rfol.formulae.Bound;
 import lu.uni.rfol.formulae.ForallFormula;
@@ -80,10 +81,61 @@ public class TestTimeShift {
 				);
 
 		RSFOLFormula f1 = new TimeShifting().perform(f);
-		System.out.println(f1.toString());
 		assertEquals(f1.toString(), "(for all t:(15.0,17.0).((s(t+-10.0)>=2.0)and(s(10.0)>=2.0)))");
 	}
+	
+	@Test
+	public void testShiftsTheValueWhenAdded4() {
+		RSFOLFormula f = new ForallFormula(
+				new Bound(new Tvariable("t"), new TimedTermNumber(3), new TimedTermNumber(5), true, true),
+				new BinaryFormula(
+						new BinaryFormula(
+				new SignalConstantComparison(new Signal(new SignalID("s"), new TimedTermExpression(
 
+						new Tvariable("t"), ArithmeticOperator.PLUS, new Value(2))), RELOP.GEQ, new Value(2)),
+				LOGICOP.CONJ,
+				new SignalConstantComparison(new Signal(new SignalID("s"), new TimedTermNumber(10)), RELOP.GEQ, new Value(2))
+				), 
+						LOGICOP.DISJ,
+						new SignalConstantComparison(new Signal(new SignalID("s"), new TimedTermNumber(15)), RELOP.GEQ, new Value(2))
+						)
+				);
+
+		RSFOLFormula f1 = new TimeShifting().perform(f);
+		System.out.println(f1.toString());
+		assertEquals(f1.toString(), "(for all t:(20.0,22.0).(((s(t+-15.0)>=2.0)and(s(10.0)>=2.0))or(s(15.0)>=2.0)))");
+	}
+
+	@Test
+	public void testShiftsTheValueWhenAdded5() {
+		RSFOLFormula f = new ForallFormula(
+				new Bound(new Tvariable("t"), new TimedTermNumber(3), new TimedTermNumber(5), true, true),
+				new BinaryFormula(
+						new BinaryFormula(
+
+				new SignalConstantComparison(
+						
+						new BinaryExpression(
+								new Signal(new SignalID("s"), new TimedTermExpression(
+
+										new Tvariable("t"), ArithmeticOperator.PLUS, new Value(2)))
+								, new Signal(new SignalID("s"), new TimedTermNumber(30)), ArithmeticOperator.PLUS)
+						
+						
+						, RELOP.GEQ, new Value(2)),
+				LOGICOP.CONJ,
+				new SignalConstantComparison(new Signal(new SignalID("s"), new TimedTermNumber(10)), RELOP.GEQ, new Value(2))
+				), 
+						LOGICOP.DISJ,
+						new SignalConstantComparison(new Signal(new SignalID("s"), new TimedTermNumber(15)), RELOP.GEQ, new Value(2))
+						)
+				);
+
+		RSFOLFormula f1 = new TimeShifting().perform(f);
+		System.out.println(f1.toString());
+		assertEquals(f1.toString(), "(for all t:(35.0,37.0).((((s(t+-30.0))+(s(30.0))>=2.0)and(s(10.0)>=2.0))or(s(15.0)>=2.0)))");
+	}
+	
 	@Test
 	public void testDoesNotShiftValueWhenSubstracted() {
 		RSFOLFormula f = new ForallFormula(

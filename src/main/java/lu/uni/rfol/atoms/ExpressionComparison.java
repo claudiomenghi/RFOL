@@ -5,28 +5,37 @@ import com.google.common.base.Preconditions;
 import lu.uni.rfol.RELOP;
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class ExpressionComparison implements Atom{
+public class ExpressionComparison implements Atom {
 
 	private final Expression expression1;
 	private final Expression expression2;
 
 	private final RELOP op;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public ExpressionComparison(Expression expression1, RELOP op, Expression expression2) {
+		UI=UIGenerator.generateUI();
 		Preconditions.checkNotNull(expression1, "Expression 1 cannot be null");
 		Preconditions.checkNotNull(expression2, "Expression 2 cannot be null");
 		this.expression1 = expression1;
 		this.expression2 = expression2;
 		this.op = op;
 	}
-	
+
 	@Override
 	public <S> S accept(RSFOLVisitor<S> v) {
 		return v.visit(this);
 	}
-	
+
 	public Expression getExpression1() {
 		return expression1;
 	}
@@ -38,7 +47,7 @@ public class ExpressionComparison implements Atom{
 	public RELOP getOp() {
 		return op;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "(" + expression1.toString() + op.toString() + expression2.toString() + ")";
@@ -80,29 +89,29 @@ public class ExpressionComparison implements Atom{
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate==false) {
+		if (negate == false) {
 			return this;
 		}
-		if(op==RELOP.EQ) {
+		if (op == RELOP.EQ) {
 			return new ExpressionComparison(expression1, RELOP.NEQ, expression2);
 		}
-		if(op==RELOP.GE) {
+		if (op == RELOP.GE) {
 			return new ExpressionComparison(expression1, RELOP.LEQ, expression2);
 		}
-		if(op==RELOP.GEQ) {
+		if (op == RELOP.GEQ) {
 			return new ExpressionComparison(expression1, RELOP.LE, expression2);
 		}
-		if(op==RELOP.LE) {
+		if (op == RELOP.LE) {
 			return new ExpressionComparison(expression1, RELOP.GEQ, expression2);
 		}
-		if(op==RELOP.LEQ) {
+		if (op == RELOP.LEQ) {
 			return new ExpressionComparison(expression1, RELOP.GE, expression2);
 		}
-		if(op==RELOP.NEQ) {
+		if (op == RELOP.NEQ) {
 			return new ExpressionComparison(expression1, RELOP.EQ, expression2);
 		}
 		throw new IllegalArgumentException("Operation not supported");
-	
+
 	}
 
 	@Override
@@ -110,7 +119,4 @@ public class ExpressionComparison implements Atom{
 		return expression1.refersToConstantInstant() || expression2.refersToConstantInstant();
 	}
 
-	
-
-	
 }

@@ -7,6 +7,7 @@ import lu.uni.rfol.atoms.Value;
 import lu.uni.rfol.expression.ArithmeticOperator;
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class TimedTermExpression implements TimedTerm {
@@ -14,6 +15,13 @@ public class TimedTermExpression implements TimedTerm {
 	private final Tvariable tvariable;
 	private ArithmeticOperator operator;
 	private Value number;
+
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
 
 	public void setOperator(ArithmeticOperator operator) {
 		this.operator = operator;
@@ -26,12 +34,13 @@ public class TimedTermExpression implements TimedTerm {
 	public void setNumber(Value number) {
 		this.number = number;
 	}
-	
+
 	public void shift(float value) {
-		this.number=new Value(number.getVal()+value);
+		this.number = new Value(number.getVal() + value);
 	}
 
 	public TimedTermExpression(Tvariable tvariable, ArithmeticOperator operator, Value f) {
+		UI=UIGenerator.generateUI();
 		Preconditions.checkNotNull(operator, "The arithmetic operator cannot be null");
 		this.number = f;
 		this.tvariable = tvariable;
@@ -51,15 +60,11 @@ public class TimedTermExpression implements TimedTerm {
 		return tvariable;
 	}
 
-
 	@Override
 	public String toString() {
 		return tvariable.toString() + operator + number;
 	}
 
-	
-
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -97,7 +102,7 @@ public class TimedTermExpression implements TimedTerm {
 	@Override
 	public void compose(Expression value, ArithmeticOperator op) {
 		throw new IllegalArgumentException("Not implemented");
-		
+
 	}
 
 	@Override

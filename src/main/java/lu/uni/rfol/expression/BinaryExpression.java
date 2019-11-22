@@ -1,19 +1,27 @@
 package lu.uni.rfol.expression;
 
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class BinaryExpression implements Expression{
+public class BinaryExpression implements Expression {
+
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
 
 	@Override
 	public String toString() {
-		return "(" + leftExpression + ")"+op+"(" + rightExpression + ")";
+		return "(" + leftExpression + ")" + op + "(" + rightExpression + ")";
 	}
 
 	private Expression leftExpression;
 	private Expression rightExpression;
 	private ArithmeticOperator op;
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -74,6 +82,7 @@ public class BinaryExpression implements Expression{
 
 	public BinaryExpression(Expression leftExpression, Expression rightExpression, ArithmeticOperator op) {
 		super();
+		UI=UIGenerator.generateUI();
 		this.leftExpression = leftExpression;
 		this.rightExpression = rightExpression;
 		this.op = op;
@@ -86,11 +95,9 @@ public class BinaryExpression implements Expression{
 
 	@Override
 	public float getMaximumAddedValue() {
-		return Math.max(leftExpression.getMaximumAddedValue(), 
-				(this.op.equals(ArithmeticOperator.MINUS)) ?
-				-rightExpression.getMaximumAddedValue() : 
-					rightExpression.getMaximumAddedValue()
-				);
+		return Math.max(leftExpression.getMaximumAddedValue(),
+				(this.op.equals(ArithmeticOperator.MINUS)) ? -rightExpression.getMaximumAddedValue()
+						: rightExpression.getMaximumAddedValue());
 	}
 
 	@Override

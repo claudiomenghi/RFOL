@@ -11,15 +11,23 @@ public class BinaryFormula implements RSFOLFormula {
 	private final RSFOLFormula subformula2;
 	private final LOGICOP op;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	@Override
 	public String toString() {
-		return "(" + subformula1.toString() + op + subformula2 + ")";
+		return "(" + subformula1 + op + subformula2 + ")";
 	}
 
 	public BinaryFormula(RSFOLFormula subformula1, LOGICOP op, RSFOLFormula subformula2) {
+		UI=UIGenerator.generateUI();
 		Preconditions.checkNotNull(subformula1, "The subformula1 cannot be null");
 		Preconditions.checkNotNull(subformula2, "The subformula2 cannot be null");
-		
+
 		this.subformula1 = subformula1;
 		this.subformula2 = subformula2;
 		this.op = op;
@@ -75,13 +83,13 @@ public class BinaryFormula implements RSFOLFormula {
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate==false) {
+		if (negate == false) {
 			return this;
 		}
-		if(op.equals(LOGICOP.CONJ)) {
+		if (op.equals(LOGICOP.CONJ)) {
 			return new BinaryFormula(subformula1.pushNegations(true), LOGICOP.DISJ, subformula2.pushNegations(true));
 		}
-		if(op.equals(LOGICOP.DISJ)) {
+		if (op.equals(LOGICOP.DISJ)) {
 			return new BinaryFormula(subformula1.pushNegations(true), LOGICOP.CONJ, subformula2.pushNegations(true));
 		}
 		throw new IllegalArgumentException("Operation not supported");

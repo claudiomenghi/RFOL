@@ -1,9 +1,18 @@
 package lu.uni.rfol.expression;
 
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class SignedExpression implements Expression {
+
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+	
 
 	public ArithmeticOperator getOp() {
 		return op;
@@ -18,16 +27,15 @@ public class SignedExpression implements Expression {
 	}
 
 	private ArithmeticOperator op;
-	
-	
 
 	private final Expression exp;
 
 	public SignedExpression(Expression exp, ArithmeticOperator op) {
-		this.op=op;
+		UI=UIGenerator.generateUI();
+		this.op = op;
 		this.exp = exp;
 	}
-	
+
 	@Override
 	public <S> S accept(RSFOLVisitor<S> v) {
 		return v.visit(this);
@@ -35,12 +43,12 @@ public class SignedExpression implements Expression {
 
 	@Override
 	public String toString() {
-		return  op .toString()+ exp.toString();
+		return op.toString() + exp.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
-		if(op.equals(ArithmeticOperator.PLUS)) {
+		if (op.equals(ArithmeticOperator.PLUS)) {
 			return exp.hashCode();
 		}
 		final int prime = 31;
@@ -78,6 +86,7 @@ public class SignedExpression implements Expression {
 	public RSFOLFormula pushNegations(boolean negate) {
 		return this;
 	}
+
 	@Override
 	public boolean refersToConstantInstant() {
 		return this.exp.refersToConstantInstant();

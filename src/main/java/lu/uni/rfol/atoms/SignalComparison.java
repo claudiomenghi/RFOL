@@ -3,6 +3,7 @@ package lu.uni.rfol.atoms;
 import lu.uni.rfol.RELOP;
 import lu.uni.rfol.Signal;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class SignalComparison implements Atom {
@@ -12,7 +13,15 @@ public class SignalComparison implements Atom {
 	private final RELOP op;
 	private final Signal signal2;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public SignalComparison(Signal signal1, RELOP op, Signal signal2) {
+		UI=UIGenerator.generateUI();
 		this.signal1 = signal1;
 		this.signal2 = signal2;
 		this.op = op;
@@ -76,25 +85,25 @@ public class SignalComparison implements Atom {
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate==false) {
+		if (negate == false) {
 			return this;
 		}
-		if(op==RELOP.EQ) {
+		if (op == RELOP.EQ) {
 			return new ExpressionComparison(signal1, RELOP.NEQ, signal2);
 		}
-		if(op==RELOP.GE) {
+		if (op == RELOP.GE) {
 			return new ExpressionComparison(signal1, RELOP.LEQ, signal2);
 		}
-		if(op==RELOP.GEQ) {
+		if (op == RELOP.GEQ) {
 			return new ExpressionComparison(signal1, RELOP.LE, signal2);
 		}
-		if(op==RELOP.LE) {
+		if (op == RELOP.LE) {
 			return new ExpressionComparison(signal1, RELOP.GEQ, signal2);
 		}
-		if(op==RELOP.LEQ) {
+		if (op == RELOP.LEQ) {
 			return new ExpressionComparison(signal1, RELOP.GE, signal2);
 		}
-		if(op==RELOP.NEQ) {
+		if (op == RELOP.NEQ) {
 			return new ExpressionComparison(signal1, RELOP.EQ, signal2);
 		}
 		throw new IllegalArgumentException("Operation not supported");

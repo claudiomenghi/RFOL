@@ -8,7 +8,15 @@ public class NotFormula implements RSFOLFormula {
 
 	private final RSFOLFormula subformula;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public NotFormula(RSFOLFormula subformula) {
+		UI=UIGenerator.generateUI();
 		Preconditions.checkNotNull(subformula, "The subformula cannot be null");
 		this.subformula = subformula;
 	}
@@ -49,15 +57,14 @@ public class NotFormula implements RSFOLFormula {
 
 	@Override
 	public String toString() {
-		return "("+"!" + subformula+")";
+		return "(" + "!" + subformula + ")";
 	}
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate) {
+		if (negate) {
 			return subformula;
-		}
-		else {
+		} else {
 			return subformula.pushNegations(true);
 		}
 	}

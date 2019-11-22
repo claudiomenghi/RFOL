@@ -4,17 +4,26 @@ import java.util.Comparator;
 
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class Value implements Expression {
 
-	
-	public static Comparator<Value> valueComparator=	new Comparator<Value>() {
-        @Override
-        public int compare(Value h1, Value h2) {
-            return h1.getVal()> h2.getVal() ? 1: h1.getVal() == h2.getVal()? 0 :-1;
-        }
- };
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
+	public static Comparator<Value> valueComparator = new Comparator<Value>() {
+		
+		@Override
+		public int compare(Value h1, Value h2) {
+			return h1.getVal() > h2.getVal() ? 1 : h1.getVal() == h2.getVal() ? 0 : -1;
+		}
+	};
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -38,11 +47,12 @@ public class Value implements Expression {
 	}
 
 	private float val;
-	
+
 	public Value(float val) {
-		this.val=val;
+		UI=UIGenerator.generateUI();
+		this.val = val;
 	}
-	
+
 	public float getVal() {
 		return val;
 	}

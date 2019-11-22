@@ -1,9 +1,17 @@
 package lu.uni.rfol.expression;
 
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
 public class CosExpression implements Expression {
+
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
 
 	@Override
 	public String toString() {
@@ -13,7 +21,7 @@ public class CosExpression implements Expression {
 	private final Expression exp;
 
 	public CosExpression(Expression exp) {
-
+		UI=UIGenerator.generateUI();
 		this.exp = exp;
 	}
 
@@ -29,6 +37,7 @@ public class CosExpression implements Expression {
 	public Expression getSubformula() {
 		return exp;
 	}
+
 	@Override
 	public float getMaximumAddedValue() {
 		return exp.getMaximumAddedValue();
@@ -38,6 +47,7 @@ public class CosExpression implements Expression {
 	public RSFOLFormula pushNegations(boolean negate) {
 		return this;
 	}
+
 	@Override
 	public boolean refersToConstantInstant() {
 		return this.exp.refersToConstantInstant();

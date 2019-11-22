@@ -1,25 +1,33 @@
 package lu.uni.rfol.atoms;
 
-
 import lu.uni.rfol.RELOP;
 import lu.uni.rfol.expression.Expression;
 import lu.uni.rfol.formulae.RSFOLFormula;
+import lu.uni.rfol.formulae.UIGenerator;
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class SignalConstantComparison  implements Atom {
+public class SignalConstantComparison implements Atom {
 
 	private final Expression signal;
 
 	@Override
 	public String toString() {
-		return "("+signal.toString() + op.toString() + value+")";
+		return "(" + signal.toString() + op.toString() + value + ")";
 	}
 
 	private final RELOP op;
 
 	private final Value value;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public SignalConstantComparison(Expression signal, RELOP op, Value value) {
+		UI=UIGenerator.generateUI();
 		this.signal = signal;
 		this.value = value;
 		this.op = op;
@@ -37,10 +45,6 @@ public class SignalConstantComparison  implements Atom {
 	public Value getValue() {
 		return value;
 	}
-
-
-
-	
 
 	@Override
 	public int hashCode() {
@@ -82,25 +86,25 @@ public class SignalConstantComparison  implements Atom {
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate==false) {
+		if (negate == false) {
 			return this;
 		}
-		if(op==RELOP.EQ) {
+		if (op == RELOP.EQ) {
 			return new ExpressionComparison(signal, RELOP.NEQ, value);
 		}
-		if(op==RELOP.GE) {
+		if (op == RELOP.GE) {
 			return new ExpressionComparison(signal, RELOP.LEQ, value);
 		}
-		if(op==RELOP.GEQ) {
+		if (op == RELOP.GEQ) {
 			return new ExpressionComparison(signal, RELOP.LE, value);
 		}
-		if(op==RELOP.LE) {
+		if (op == RELOP.LE) {
 			return new ExpressionComparison(signal, RELOP.GEQ, value);
 		}
-		if(op==RELOP.LEQ) {
+		if (op == RELOP.LEQ) {
 			return new ExpressionComparison(signal, RELOP.GE, value);
 		}
-		if(op==RELOP.NEQ) {
+		if (op == RELOP.NEQ) {
 			return new ExpressionComparison(signal, RELOP.EQ, value);
 		}
 		throw new IllegalArgumentException("Operation not supported");

@@ -4,12 +4,20 @@ import com.google.common.base.Preconditions;
 
 import lu.uni.rfol.visitors.RSFOLVisitor;
 
-public class ExistsFormula implements RSFOLFormula,Quantification {
+public class ExistsFormula implements RSFOLFormula, Quantification {
 
 	private RSFOLFormula f;
 	private Bound b;
 
+	private final int UI;
+
+	@Override
+	public int getUI() {
+		return UI;
+	}
+
 	public ExistsFormula(Bound b, RSFOLFormula f) {
+		UI=UIGenerator.generateUI();
 		Preconditions.checkNotNull(f, "The subformula cannot be null");
 		Preconditions.checkNotNull(b, "The bound cannot be null");
 
@@ -63,12 +71,12 @@ public class ExistsFormula implements RSFOLFormula,Quantification {
 
 	@Override
 	public String toString() {
-		return "("+b+"."+f+")";
+		return "(" + "exists " +b + "." + f + ")";
 	}
 
 	@Override
 	public RSFOLFormula pushNegations(boolean negate) {
-		if(negate==false) {
+		if (negate == false) {
 			return this;
 		}
 		return new ForallFormula(b, f.pushNegations(true));
